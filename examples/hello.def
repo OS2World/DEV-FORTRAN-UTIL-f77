@@ -1,0 +1,3 @@
+NAME HELLO WINDOWCOMPAT
+DESCRIPTION 'hello - the famous hellp world program'
+STACKSIZE 0x10000

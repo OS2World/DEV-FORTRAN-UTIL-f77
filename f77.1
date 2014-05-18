@@ -1,0 +1,389 @@
+.\"$Id: f77.1,v 1.1 1994/08/08 23:40:17 jcp Exp jcp $"
+.TH F77 1 "8 Aug, 1994"
+.SH NAME
+f77 - Fortran 77 Compiler
+.SH SYNOPSIS
+.B f77
+.B [-a] [-c] [-C] [-D\c
+.I macro[=def]]
+.B [-f] [-g] [-I\c
+.I dir]
+.B [-k] [-L\c
+.I dir]
+.B [-N\c
+.I tnnn]
+.B ] [-o
+.I outfile\c
+.B ] [-O] [-P
+.I prog:opt\c
+.B ] [-r8] [-T\c
+.I dir
+.B ] [-u] [-v] [-w]
+.B [-w66] [-Zopt] [-1] input_files [-l\c
+.I x]
+.SH DESCRIPTION
+.I f77
+is a bourne shell script that utilizes the duo of the
+.B f2c
+Fortran 77 to C converter, and the
+.B gcc/emx
+C compiler, to provide
+a user interface similar to native Fortran 77 compilers.
+These applications must be installed on your system for
+.I f77
+to work.
+.LP
+.I f77
+runs in one of two modes, link mode, or compile mode. By default,
+.I f77
+runs in link mode. In this mode,
+.I f77
+attempts to create an executable from objects that are explicitly
+specified, and those objects compiled from explicitly specified
+source code files. If the
+.B -c
+option is present,
+.I f77
+runs in compile only mode. In this mode,
+.I f77
+creates objects for each specified source file. Any explicitly
+specified object files are ignored, and the linking of an
+executable is suppressed.
+.SH OPTIONS
+.I f77
+recognizes the following command line switches:
+.TP
+.B -a
+Allocation of memory for local Fortran 77 variables occurs
+dynamically at execution time (variables that explicitly appear in a
+.B DATA, EQUIVALENCE, NAMELIST,
+or
+.B SAVE
+statement are always statically allocated memory at compile time.)
+The default is to use static compile time allocation for all variables.
+This option only applies to Fortran source code files.
+.TP
+.B -c
+Run in compile only mode, suppress the linking of an executable. Any
+object files or libraries in the the list of input files are quietly
+ignored. The default is to run in link mode.
+.TP
+.B -C
+The code is instrumented to check at run time, that array subscripts
+are within the dimensioned bounds of the array. This does not apply to
+arrays that are declared with adjustable dimensions.
+This option only applies to Fortran source code files.
+.TP
+.BI \-D macro[=def]
+.IP
+Define a macro to be presented to the C preprocessor. The C
+preprocessor is run when processing a .fpp source code file,
+and by the C compiler itself when compiling a .c source code
+file.
+.TP
+.B -f
+Enable free format Fortran 77 source. Source lines longer than
+72 characters are accepted. Source lines less than 72 characters
+are not padded with blanks. This option is passed directly to
+the
+.B f2c
+converter.
+.TP
+.B -g
+Generate symbol table information for use with debuggers, such as
+.B gdb(1).
+Note that if one wants to create an excutable instrumented for
+debugging, by seperately compiling source into a relocatable
+object, followed by linking, the
+.B -g
+flag should be included in both invocations of
+.I f77.
+This option applies to both Fortran and C source code files.
+.TP
+.BI \-I dir
+.IP
+Insert the directory
+.I dir
+at the beginning of the path to be searched by the C preprocessor
+for include files. Note that this option only affects the
+behavior of the C preprocessor. It does not affect the manner
+in which the
+.B f2c
+converter locates include files referenced
+in Fortran 77 source code.
+.TP
+.B -k
+Keep the .c output file from the
+.B f2c
+converter when compiling a .f file. Also, keep the .f output file
+from the C preprocessor when compiling a .fpp file. The .c and .f file
+names are obtained by replacing the .f or .fpp suffix of the input
+file name. Note that any already existing files with these names
+will be quietly overwritten. The default is to create temporary
+files in the current directory.
+.TP
+.BI \-L dir
+.IP
+Insert the directory
+.I dir
+at the beginning of the path to be searched for library
+files during the link phase.
+.TP
+.BI \-N tnnn
+.IP
+Modify the length of statically allocated tables, internal to the
+.B f2c
+converter. In general, when an internal table overflow occurs,
+.B f2c
+will issue a diagnostic message that describes the syntax of the
+option required to correct the problem. See
+.B f2c(1)
+for a complete description.
+.TP
+.BI \-o output
+.IP
+In the default link mode, this option specifies that the linked
+executable file should be named
+.I output
+instead of the default name of a.exe. Note that
+.B gcc/emx
+may not create an executable file if your file name fails to have a .exe
+suffix!!! In compile only mode, (when the
+.B -c
+switch is present),
+this specifies that the object file to be created should be named
+.I output.
+The default name is constructed by replacing the relevant suffix of
+the input file with a .o (or .obj, see the
+.B -Zopt
+option) suffix. In compile mode, this option only
+makes sense when a single source code input file is being compiled.
+.TP
+.B -O
+When the
+.B -O
+option is present, the compiler attempts to reduce the size of
+the generated code and execution time. When
+.B -O
+is absent, the compiler's goal is to reduce the cost of the
+compilation itself, see the
+.B gcc/emx
+documentation.
+This option applies to both Fortran and C source code files.
+.TP
+.BI \-P prog:opt
+.IP
+Pass the option(s)
+.I opt
+to the compilation phase program
+.I prog.
+Legal values for
+.I prog
+are;
+.B cpp, f2c, cc,
+or
+.B ld.
+To pass multiple options, use a quoted string for
+.I prog:opt.
+The option(s) in
+.I opt
+are passed directly to
+.I prog, f77
+does not attempt to validate them in any way.
+.TP
+.B -r8
+Automatically promote all Fortran variables of type REAL to
+DOUBLE PRECISION, and type COMPLEX to DOUBLE COMPLEX.
+This option only applies to Fortran source code files.
+.TP
+.BI \-T dir
+Create temporary files created by the C preprocessor and the
+.B f2c
+converter in the directory
+.I dir.
+This switch is ignored if the
+.B -k
+switch is present. (See above.)
+.TP
+.B -u
+Make the default type of all Fortran variables undefined.
+.TP
+.B -v
+Print the command line for each subprocess executed by
+.I f77.
+This option is also passed to the
+.B gcc/emx
+compiler and the loader, causing them to do the same.
+.TP
+.B -w
+Suppress the printing of all warning messages from the
+.B f2c
+converter. Obviously, this option only applies to compilation
+of Fortran source code files.
+.TP
+.B -w66
+Suppress the printing of Fortran 66 compatibility warning messages from the
+.B f2c
+converter. Obviously, this option only applies to compilation
+of Fortran source code files.
+.TP
+.B -Zopt
+Options beginning with
+.B -Z
+are passed directly to the
+.B gcc/emx
+compiler and the linker. In particular, the
+.B -Zomf
+option will generate OS/2 object module format object files, and
+".obj" will become the expected suffix of all object files. See the
+.B gcc/emx
+documentation for the most accurate and complete information.
+.TP
+.B -1
+Generate code where Fortran DO loops are executed at least once,
+regardless of the values of the lower and upper limits of the
+loop index. In Fortran 77, a DO loop where the lower limit is
+greater than the upper limit is not executed. This option only
+applies to compilation of Fortran source code files.
+.TP
+.I input_files
+.IP
+Input file(s) that end with a '.fpp', '.f', '.c', '.o', or '.obj' suffix.
+.IP
+Files that end with a .f suffix are assumed to contain Fortran 77
+source code. They are first translated to C source code using the
+.B f2c
+converter and then compiled with the
+.B gcc/emx
+compiler. The intermediate C source code is written to a temporary
+file, unless the
+.B -k
+option is present. The compiled relocatable object code is written
+to a file in the current directory (regardless of the location of
+the input file), with the same name as the input file, with a .o
+(or .obj, see the
+.B -Zopt
+option) suffix substituted for the .f suffix.
+.IP
+Files with names ending in .fpp are assumed to contain Fortran 77
+source code and C preprocessor directives. However, they are first
+preprocessed by the C preprocessor before being compiled as above.
+The intermediate processed Fortran 77 source code is written to a
+temporary file, unless the
+.B -k
+option is present.
+.IP
+Note that the .fpp suffix convention is a departure from the UNIX
+convention which is a .F suffix. The .fpp convention is used under OS/2
+because the OS/2 file system preserves, but ignores case. In particular,
+you can't have files with both a .f and .F suffix in the same directory,
+(they would equate to the same file since case is ignored). I just
+pulled the .fpp suffix out of thin air. The script can be configured to
+use another suffix for this if so desired.
+.IP
+Files with names ending in .c are assumed to contain C source code.
+They are compiled with the
+.B gcc/emx
+compiler, with the compiled relocatable object code written
+to a file in the current directory with the same name as the
+input file, with a .o (or .obj, see the
+.B -Zopt
+option) suffix substituted for the .c suffix.
+.TP
+.BI \-l x
+Link the executable with the library lib\c
+.IR x .a
+where
+.I x
+is a string. (The latest version of
+.B gcc/emx
+is such that, for example, the argument
+.B -lvector
+would link the executable with the library vector.a for method 1
+objects, or vector.lib
+for method 2, omf objects.)
+If the
+.B -c
+option is present, this option is ignored.
+.SH FILES
+.LP
+files.fpp
+files.f
+files.c
+.IP
+Input source code file(s).
+.LP
+files.o
+files.obj
+.IP
+Input relocatable object file(s).
+.LP
+f77.$$.[fc]
+.IP
+Temporary source code files.
+.SH EXAMPLES
+.LP
+Compile the Fortran 77 code in example.f to example.o, an EMX method 1
+object file, keep the converted C code in example.c, and be verbose;
+.IP
+f77 -c -k -v example.f
+.LP
+Compile the Fortran 77 code in example.f to example.obj, an EMX method 2
+object file, keep the converted C code in example.c, and be verbose;
+.IP
+f77 -c -Zomf -Zmtd -k -v example.f
+.SH "SEE ALSO"
+.LP
+.B f2c(1), gcc(1)
+.LP
+.B S. I. Feldman and
+.B P. J. Weinberger,
+.I 'A Portable Fortran 77 Compiler'
+UNIX Time Sharing System Programmer's Manual,
+Tenth Edition, Volume 2, AT&T Bell Laboratories, 1990.
+.SH DIAGNOSTICS
+.LP
+.I f77
+checks arguments that correspond to directories in the file
+system to see if they are valid. If a directory argument
+.B dir
+does not exist, or is not a directory, the following message is issued;
+.IP
+directory:
+.B dir
+does not exist, or is not a directory
+.LP
+.I f77
+also checks file arguments to see if they are valid. If a file argument
+.B file
+does not exist, or is not a regular file, the following message is issued;
+.IP
+file:
+.B file
+does not exist, or is not a regular file
+.SH AUTHOR
+.LP
+.I f77
+is a derivative work of the
+.I fc
+bourne shell script from the
+.B f2c
+distribution. The complete
+.B f2c
+distribution can be obtained by anonymous ftp from the host
+netlib.att.com. To obtain
+.B f2c
+by e-mail, send a message to <netlib@research.att.com>.
+Use "help" for the subject line, or as the message body.
+The directions for requesting
+.B f2c
+will be mailed back to you. This hacked version
+and man page was done by <jcp%octagon.UUCP@ucsd.edu>.
+.SH BUGS
+.LP
+The behavior of
+.I f77
+depends (heavily) on various features of the
+.B gcc/emx
+compiler. The results may be unpredictable if a different
+C compiler is used instead.
